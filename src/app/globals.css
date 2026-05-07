@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050910;
+  --foreground: #e6f7ff;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, #0c213b 0, transparent 30%),
+    radial-gradient(circle at 80% 10%, #112f4a 0, transparent 26%),
+    radial-gradient(circle at 70% 80%, #072a40 0, transparent 24%),
+    #050910;
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+select,
+option {
+  color: #e6f7ff;
+  background: #0a0f1b;
+}
+
+* {
+  scrollbar-color: #1fb6ff #0b1726;
+  scrollbar-width: thin;
+}
+
+.traxr-scrollbar {
+  scrollbar-color: #6fd3e7 #0b1726;
+  scrollbar-width: thin;
+}
+
+.traxr-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.traxr-scrollbar::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(9, 18, 31, 0.95), rgba(11, 23, 38, 0.95));
+  border-radius: 999px;
+}
+
+.traxr-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(111, 211, 231, 0.9), rgba(82, 163, 189, 0.9));
+  border: 2px solid #0b1726;
+  border-radius: 999px;
+}
+
+.traxr-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(158, 223, 236, 0.95), rgba(111, 211, 231, 0.95));
+}
+
+.gridlines {
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 70px 70px;
+}

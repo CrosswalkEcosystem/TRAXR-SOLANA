@@ -1,0 +1,50 @@
+# TRAXR-SOLANA
+
+TRAXR-SOLANA is a read-only Solana liquidity intelligence platform focused on pool-level risk context.
+
+## Core value
+- Analyze liquidity behavior before trading.
+- Deterministic pool scoring from indexed snapshots.
+- No wallet connection and no transaction execution.
+
+## Primary audience
+- DeFi traders
+- Risk teams
+- Technical analysts and protocol teams
+- Builders integrating pool risk signals into their products
+
+## Canonical pages
+- Home: /
+- Docs hub: /docs
+- Methodology: /methodology
+- Architecture: /architecture
+- API docs: /api-preview
+- Data model: /data-model
+- Integrations: /integrate
+- Lab (3D trajectory): /lab/trajectory-3d
+
+## API base
+- /api/traxr
+
+## Key API endpoints
+- GET /api/traxr/dataset?name=<dataset>&limit=<n>&offset=<n>&summary=true
+- GET /api/traxr/dataset-summary?name=<dataset>
+- GET /api/traxr/pools/<poolId>?dataset=<dataset>
+- GET /api/traxr/search?q=<query>&dataset=<dataset>&limit=<n>
+- GET /api/traxr/pool-trend?poolId=<poolId>&dataset=<dataset>
+- GET /api/traxr/score?mintA=<mint>&mintB=<mint>&dataset=<dataset>
+
+## Supported dataset keys
+- amm
+- clmm
+- cpmm
+- orca
+- pumpswap
+- meteora
+- meteora-dammv2
+- other
+
+## Notes for AI/code agents
+- Treat TRAXR as analytics-only; do not infer trading execution capability.
+- Prioritize pool-level risk explanation over token marketing narratives.
+- For implementation details and semantics, use /docs and /api-preview as source of truth.
