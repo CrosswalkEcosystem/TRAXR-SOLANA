@@ -1,24 +1,28 @@
-# SUPPORT
+# Support
 
-TRAXR-SOLANA is a read-only alpha intelligence layer for Solana pools.
-This document explains how to request help and what support is available.
+This document explains where to get help for TRAXR-SOLANA.
 
-## What TRAXR-SOLANA Supports
-- Public dashboard issues (rendering, missing pools)
-- API usage questions (`/api/traxr/*`)
-- Clarifications on score or warnings
+## Supported Topics
+- Dashboard or API behavior issues
+- Data interpretation and warning semantics
+- Integration questions for `/api/traxr/*`
+- Documentation clarifications and corrections
 
-## What TRAXR-SOLANA Does NOT Support
-- Wallets, signing, or custody
-- Trading or portfolio tracking
-- External DEX infrastructure
+## Not Supported
+- Wallets, signing, custody, or transaction execution
+- Trading strategy guidance
+- Third-party infrastructure outside this repository
 
-## How to Request Support
-1. Email: support@crosswalk.pro
-2. Security reports: security@crosswalk.pro (do not open public issues)
-3. GitHub issues for non-sensitive bugs or docs updates
+## Contact Channels
+1. General support: `support@crosswalk.pro`
+2. Security issues: `security@crosswalk.pro` (private reporting only)
+3. Non-sensitive bugs/docs: GitHub issues
 
-## Response Times (Best Effort)
-- Critical UI/API issues: 24-48 hours
-- Integration questions: 2-4 days
-- Documentation feedback: 2-4 days
+## Best-Effort Response Targets
+- Critical API/UI regressions: 24-48 hours
+- Integration and implementation questions: 2-4 business days
+- Documentation feedback: 2-4 business days
+
+## Private Scoring Note
+If your question relates to CTS internals, note that the proprietary scoring
+adapter is intentionally private and excluded from this repository.

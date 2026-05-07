@@ -1,18 +1,29 @@
 # Security Policy
 
-TRAXR-SOLANA is a read-only alpha system. It does not handle private keys,
-wallets, or transactions.
+TRAXR-SOLANA is a read-only analytics system. It does not manage private keys,
+execute transactions, or provide custody workflows.
 
-## Reporting a Vulnerability
-Please report security issues privately to the maintainers. Do not open public
-issues for sensitive reports.
+## How to Report a Vulnerability
+Please report sensitive issues privately:
+- `security@crosswalk.pro`
 
-## Scope
-- API endpoints under `/api/traxr/*`
-- UI components in `src/components/*`
-- Data adapters and fixtures under `src/lib/*` and `data/*`
+Do not open public GitHub issues for active security vulnerabilities.
 
-## Out of Scope
-- Wallets, signing, or custody
-- External DEX deployments
-- Third-party infrastructure outside this repository
+## Security Scope
+In scope:
+- API routes under `src/app/api/traxr/*`
+- Data normalization/scoring boundaries under `src/lib/*`
+- UI logic that surfaces risk information under `src/components/*`
+- Snapshot ingestion and enrichment scripts under `scripts/*`
+
+Out of scope:
+- External infrastructure not maintained in this repository
+- Upstream third-party services and RPC providers
+- Wallet, signing, and custody systems (not part of this project)
+
+## Private CTS Model Handling
+The proprietary CTS scoring implementation is intentionally not committed.
+
+- `src/lib/scoringAdapter.private.ts` must remain local/private.
+- Public repository changes must not expose model coefficients, thresholds, or formula internals.
+- Suspected leakage of private scoring logic should be reported as a security issue.

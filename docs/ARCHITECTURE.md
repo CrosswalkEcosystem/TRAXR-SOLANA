@@ -1,65 +1,68 @@
-# TRAXR-SOLANA Architecture (Alpha)
+# TRAXR-SOLANA Architecture
 
-TRAXR-SOLANA is a read-only indexing and normalization layer for Solana DeFi data.
-Scoring and risk interpretation are intentionally decoupled and mirror the
-CTS logic used by `crosswalk-dex-backend`.
+TRAXR-SOLANA is a read-only analytics architecture for Solana pool intelligence.
+It separates source-backed facts, computed heuristics, and risk interpretation so each
+layer can be reasoned about independently.
 
-Indexing never guesses. Scoring never rewrites facts.
+## Design Principles
+- Deterministic transforms over opaque mutation
+- Explicit unknowns instead of guessed values
+- Reproducible snapshots and stable identifiers
+- Clear separation between public code and private scoring logic
 
-## Layered System
-### Layer 1 - Indexed Market & Protocol Data (Live, Verifiable)
-- Source: NodeZero Solana pool datasets
-- Outputs: pool identifiers, token metadata, liquidity, volume, and program attribution
-- Source-backed, reproducible, and high-confidence
+## Repository Scope Boundary
+This repository is the application and analytics layer, not the full production
+indexing platform.
 
-### Layer 2 - Derived Heuristics (Computed, Best-Effort)
-- Liquidity depth
-- Fixed-size ($1,000) price impact
-- Data freshness
-- Marked as derived and non-authoritative
+- Production indexing and snapshot storage run on internal Crosswalk infrastructure.
+- Internal orchestration, retention policy, and infra operations are out of scope here.
+- `data/` references in code represent runtime inputs for local/dev integration.
 
-### Layer 3 - Risk & Structural Signals (Decoupled)
-- Activity, trust, stability, and fee posture
-- Derived by pool-only CTS scoring
+## System Layers
+### Layer 1: Indexed Protocol Data (Authoritative Inputs)
+- Source: NodeZero Solana datasets
+- Coverage: AMM, CLMM, CPMM, Orca Whirlpool, Meteora DLMM, and other tagged pools
+- Output: normalized identity, token metadata, liquidity, volume, and protocol context
 
-## Core Pipeline
-1. **Data Ingestion**
-   - Snapshot-based ingestion from NodeZero
-   - Solana pools only
-   - Datasets: AMM, CLMM, CPMM, Orca Whirlpool, Meteora DLMM, and other tracked pools
+### Layer 2: Derived Heuristics (Computed Context)
+- Fixed-basis execution impact estimates
+- Volatility and freshness signals
+- Fee-context normalization by pool type/protocol
+- All derived values are explicitly treated as non-authoritative
 
-2. **Normalization**
-   - Deterministic mapping into Solana pool metrics
-   - Stable identifiers and field naming
-   - Pool-type-aware fee interpretation
+### Layer 3: Risk Signals (Presentation Layer)
+- Composite score and node-level dimensions (`depth`, `activity`, `impact`, `stability`, `trust`, `fee`)
+- Warning generation and trend views
+- Read-only API responses for UI and external consumers
 
-3. **Scoring (Embedded)**
-   - Mirrors the pool-only CTS logic used by `crosswalk-dex-backend`
-   - Pure, deterministic pool-only CTS logic
+## CTS Model Privacy Boundary
+The proprietary CTS scoring adapter is intentionally excluded from tracked source.
 
-4. **Snapshot Enrichment**
-   - AMM / CPMM: exact constant-product `$1,000` impact from local reserves
-   - Orca: exact Whirlpool `$1,000` quote via `rpc-internal`
-   - Meteora: exact DLMM `$1,000` quote via `rpc-internal`
-   - Meteora: mint metadata / logo enrichment
+- Runtime optionally loads `src/lib/scoringAdapter.private.ts` when present.
+- Public repository builds run without disclosing CTS formula internals.
+- Precomputed score fields can still be surfaced when provided by upstream data.
 
-5. **Presentation**
-   - Next.js UI for CTS nodes, breakdowns, warnings
-   - Read-only API under `/api/traxr/*`
+This boundary is a core architectural choice, not a temporary workaround.
 
-## Transparency Rules
-- Unknown values are intentional and explicit
-- Derived metrics are labeled as heuristic
-- Source-backed values are never overwritten
+## Data Flow
+1. Ingestion
+   Pull snapshot datasets from NodeZero and local stores.
+2. Normalization
+   Convert heterogeneous pool payloads into a single metric contract.
+3. Enrichment
+   Apply deterministic enrichments such as quote-based impact and metadata fill.
+4. Scoring
+   Use private adapter when available, otherwise safe public fallback behavior.
+5. Serving
+   Expose read-only endpoints under `/api/traxr/*` and render dashboard views.
 
-## Alpha Constraints
-- CLMM exact price impact is not yet production-ready
-- No trading or portfolio features
-- No signing or custody
-- Historical exact Orca / Meteora depth cannot be reconstructed retroactively
+## Operational Constraints
+- No transaction signing, wallet access, or custody flows
+- No trading execution features
+- CLMM exact impact remains an evolving area
+- Historical exact quotes depend on snapshot availability
 
-## Future (Optional)
-- On-chain pool address resolution
-- Protocol-specific contract decoding
-- Snapshot trend history
-- Cross-chain aggregation
+## Reliability Notes
+- Cached refresh behavior is bounded and time-based
+- API responses are constrained by configurable limits
+- Unknown or missing fields are surfaced explicitly, not hidden

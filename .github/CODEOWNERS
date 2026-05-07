@@ -1,0 +1,8 @@
+# Default ownership
+* @CrosswalkEcosystem
+
+# Critical boundaries
+src/lib/scoringAdapter.ts @CrosswalkEcosystem
+README.md @CrosswalkEcosystem
+docs/* @CrosswalkEcosystem
+SECURITY.md @CrosswalkEcosystem

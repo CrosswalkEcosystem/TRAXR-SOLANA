@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  repo-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure private scorer is not tracked
+        run: |
+          if git ls-files --error-unmatch src/lib/scoringAdapter.private.ts >/dev/null 2>&1; then
+            echo "Private scoring adapter must not be tracked."
+            exit 1
+          fi
+
+      - name: Ensure runtime data artifacts are not tracked
+        run: |
+          if git ls-files | grep -E '(^data/|\.live\.json(\.gz)?$|\.sqlite$|\.db$|pumpswap\.live)'; then
+            echo "Tracked runtime data artifact detected."
+            exit 1
+          fi
+
+      - name: Verify env template exists
+        run: test -f .env.example
+
+  quality-signal:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      NEXT_PUBLIC_TRAXR_ENABLED: "true"
+      TRAXR_FALLBACK_SAMPLE: "true"
+      TRAXR_USE_SQLITE: "false"
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint (non-blocking)
+        run: npm run lint
+
+      - name: Build (non-blocking)
+        run: npm run build

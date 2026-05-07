@@ -1,122 +1,125 @@
-# TRAXR-SOLANA (Alpha)
-### Pool Risk Intelligence
+# TRAXR-SOLANA
+### Solana Pool Risk Intelligence (Hackathon Build)
 
-![Status](https://img.shields.io/badge/status-alpha-blue)
+![Status](https://img.shields.io/badge/status-hackathon-blue)
 ![Network](https://img.shields.io/badge/network-Solana-black)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 
-TRAXR-SOLANA is a foundational indexing and normalization layer for the Solana
-DeFi ecosystem. The current deployment establishes a clean, verifiable data
-substrate; CTS scoring runs in-app using pool-only signals and enriched
-snapshot data.
+TRAXR-SOLANA is a read-only analytics system for Solana liquidity pools. It ingests
+source-backed pool data, normalizes it into a stable schema, derives structural
+risk signals, and serves those results through a web UI and API.
 
-This is not a full product rewrite. It is a minimal infrastructure experiment
-focused on correctness, clarity, and determinism.
-
-Indexing never guesses. Scoring never rewrites facts.
+The project is optimized for clarity and reproducibility:
+- Indexing never guesses.
+- Derived signals are labeled as heuristics.
+- Raw source-backed fields are never rewritten.
 
 ## Documentation
-- [ROADMAP](docs/ROADMAP.md)
-- [ARCHITECTURE](docs/ARCHITECTURE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [API Reference](docs/API.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Changelog](CHANGELOG.md)
 
 ## Quickstart
-```
+```bash
+nvm use
 npm install
 npm run dev
 # http://localhost:3000
 ```
 
-## Environment Configuration
-### Core flags
-- `NEXT_PUBLIC_TRAXR_ENABLED=true|false` - toggle TRAXR-SOLANA UI.
-- `TRAXR_FALLBACK_SAMPLE=true` - load embedded sample pools.
-- `TRAXR_LOCAL_POOLS_PATH` - path to Solana pool JSON (default: newest `data/solanaPools_*.json`, fallback `data/solanaPools.json`).
+Environment setup:
+```bash
+cp .env.example .env.local
+```
 
-## Layered Architecture
-### Layer 1 - Indexed Market & Protocol Data (Live, Verifiable)
-- Ingests Solana pool datasets from NodeZero
-- Covers AMM, CLMM, CPMM, Orca Whirlpool, Meteora DLMM, and other tracked pools
-- Normalizes pool identifiers, token metadata, liquidity and volume
-- Source-backed and reproducible
+## What This Repository Includes
+- Next.js app and API endpoints under `src/app/api/traxr/*`
+- Data normalization and trend logic under `src/lib/*`
+- Fetch and enrichment scripts under `scripts/*`
+- UI components for score breakdowns, warnings, and trend views
 
-### Layer 2 - Derived Heuristics (Computed, Best-Effort)
-- Liquidity depth, $1,000 quote-based price impact, and freshness/status context
-- Marked as derived, never treated as protocol guarantees
+## Scope Boundary: Internal Indexing vs Public App Repo
+TRAXR-SOLANA consumes snapshot datasets, but the production indexing pipeline and
+snapshot storage infrastructure are internal and out of scope for this repository.
 
-### Layer 3 - Risk & Structural Signals (CTS)
-- Activity, stability, trust, fee, impact
-- Computed by embedded CTS scoring logic
+- In production, indexing/storage run on Crosswalk-managed infrastructure.
+- This repository contains the app/API layer and snapshot consumption logic.
+- Local `data/` paths in code are runtime integration points, not a committed data lake.
+- Public contributors should treat `data/` as environment-specific runtime input.
 
-## Snapshot Model
-The app operates on stamped JSON snapshots in `data/`. The UI loads the newest
-snapshot per dataset and derives trend history from the retained snapshot set.
+## CTS Scoring Privacy Boundary
+The CTS model implementation is intentionally kept private and out of source control.
 
-## Data Source (NodeZero)
-TRAXR-SOLANA fetches pool datasets only from NodeZero:
+- Private deployments can provide `src/lib/scoringAdapter.private.ts`.
+- That file is gitignored and loaded dynamically at runtime.
+- Public/publishable builds do not expose the proprietary CTS formula.
+
+If upstream snapshots already include precomputed CTS fields, TRAXR can display those
+values without shipping the private model logic.
+
+## Data Pipeline
+TRAXR ingests Solana pool datasets from NodeZero and then performs local enrichment:
+- AMM/CPMM exact constant-product `$1,000` impact estimation
+- Orca Whirlpool quote-based impact enrichment
+- Meteora DLMM quote-based impact enrichment
+- Metadata/logo enrichment for supported pools
+
+Default source:
 - Base URL: `https://nodezero.crosswalk.pro/data/traxr/solana/`
 - Header: `X-API-Key: $NODEZERO_API_KEY`
 
-During `fetch:solana`, TRAXR-SOLANA also applies local enrichments before
-writing the final stamped snapshots:
-- AMM / CPMM: exact constant-product `$1,000` price impact from snapshot reserves
-- Orca: exact `$1,000` Whirlpool quote via `rpc-internal`
-- Meteora DLMM: exact `$1,000` DLMM quote via `rpc-internal`
-- Meteora DLMM: token metadata and logo enrichment by mint
-- CTS scoring, stability/volatility derivation, and warnings inputs
+Snapshot retention, archival strategy, and production indexing orchestration are
+managed internally and are not part of this open repository's scope.
 
-Run:
-```
-npm run fetch:solana
-```
-Optional:
-- `NODEZERO_API_KEY` - required API key for NodeZero.
-- `NODEZERO_RPC_KEY` - required key for Orca / Meteora quote enrichment
-- `NODEZERO_RPC_URL` - override RPC endpoint (default: `https://nodezero.crosswalk.pro/rpc-internal`)
+## Environment Variables
+Core:
+- `NEXT_PUBLIC_TRAXR_ENABLED=true|false`
+- `TRAXR_USE_SQLITE=true|false`
+- `TRAXR_FALLBACK_SAMPLE=true|false`
 
-## CTS Scoring Boundary
-The publishable repository keeps the CTS model implementation outside source
-control. Local/private deployments can provide
-`src/lib/scoringAdapter.private.ts`, which is gitignored and loaded at runtime.
+Data/runtime:
+- `TRAXR_LOCAL_DATA_DIR` (default `data/`)
+- `TRAXR_LOCAL_POOLS_PATH` (optional direct snapshot path)
+- `TRAXR_API_LIMIT` and `TRAXR_API_MAX_LIMIT`
 
-Without that private module, the public build does not expose the CTS formula.
-If upstream data already contains precomputed CTS outputs, the app can still
-display those values without shipping the model logic itself.
+Enrichment:
+- `NODEZERO_API_KEY`
+- `NODEZERO_RPC_KEY`
+- `NODEZERO_RPC_URL` (default `https://nodezero.crosswalk.pro/rpc-internal`)
 
-Private deployments may still use behavior such as:
-- Price Impact uses a fixed simulated `$1,000` swap basis
-- Fee competitiveness uses pool-type-aware baselines
-- Meteora DLMM fee uses `base_fee_percentage`, not dynamic max fee
-- Stability is derived from retained snapshot history where enough price points exist
-
-## API (read-only)
-Fuzzy matching works on mintA/mintB, token names, symbols, and addresses.
-
+## API Overview (Read-Only)
 Example:
-```
-GET http://localhost:3000/api/traxr/score?mintA=SOL&mintB=USDC
+```http
+GET /api/traxr/score?mintA=SOL&mintB=USDC
 ```
 
-Response includes:
-- pool ID
-- TRAXR score (0-100) and CTS nodes (1-6)
-- dimensional breakdown and warnings
-- normalized metrics used for computation
-
-Additional endpoints:
+Main endpoints:
+- `GET /api/traxr/score`
 - `GET /api/traxr/pools`
 - `GET /api/traxr/pools/:id`
 - `GET /api/traxr/pool-trend?poolId=...`
 - `GET /api/traxr/alerts`
 
-## Status
-TRAXR-SOLANA is in alpha. Current exact price impact coverage is:
-- AMM
-- CPMM
-- Orca Whirlpool
-- Meteora DLMM
+Typical response fields:
+- Pool identity (`poolId`, token symbols/mints)
+- `score` (`0-100`) and `ctsNodes` (`0-6`)
+- Node breakdown (`depth`, `activity`, `impact`, `stability`, `trust`, `fee`)
+- Warning list and normalized metrics payload
 
-CLMM exact price impact is still under active investigation and is not yet
-treated as production-ready.
+## Hackathon Notes
+- This repo is intentionally read-only analytics: no wallets, no signing, no custody.
+- Exact CLMM impact is still maturing and should be treated as experimental.
+- Some scripts assume access to internal NodeZero services and keys.
+
+## Public Release Checklist
+- Ensure `src/lib/scoringAdapter.private.ts` is not present/tracked.
+- Confirm no local snapshots/databases are tracked in git.
+- Run `npm run build`.
+- Verify docs match current runtime behavior and scope boundaries.
 
 ## License
-UNLICENSED - proprietary module.
+UNLICENSED - Proprietary. See [LICENSE](LICENSE).
