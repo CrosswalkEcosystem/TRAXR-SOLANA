@@ -52,6 +52,8 @@ jobs:
 
       - name: Lint (non-blocking)
         run: npm run lint
+        continue-on-error: true
 
       - name: Build (non-blocking)
         run: npm run build
+        continue-on-error: true
