@@ -36,6 +36,10 @@ Environment setup:
 cp .env.example .env.local
 ```
 
+Production note:
+- This repo's production build uses `webpack` via `npm run build`.
+- Reason: Next.js 16 Turbopack can fail in this app when `data/` is a symlink to external snapshot storage.
+
 ## What This Repository Includes
 - Next.js app and API endpoints under `src/app/api/traxr/*`
 - Data normalization and trend logic under `src/lib/*`

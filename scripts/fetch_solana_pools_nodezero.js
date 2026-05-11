@@ -212,6 +212,24 @@ function updatePipelineStatus(state, step, message, stats = null) {
   try {
     const statusDir = path.dirname(PIPELINE_STATUS_PATH);
     if (!fs.existsSync(statusDir)) return;
+    let previous = {};
+    if (fs.existsSync(PIPELINE_STATUS_PATH)) {
+      try {
+        previous = JSON.parse(fs.readFileSync(PIPELINE_STATUS_PATH, "utf8"));
+      } catch {}
+    }
+    const timestamp = new Date().toISOString();
+    const stepChanged = previous?.step !== step;
+    const startedAt =
+      typeof previous?.startedAt === "string" && previous.startedAt
+        ? previous.startedAt
+        : timestamp;
+    const stepStartedAt =
+      !stepChanged &&
+      typeof previous?.stepStartedAt === "string" &&
+      previous.stepStartedAt
+        ? previous.stepStartedAt
+        : timestamp;
     fs.writeFileSync(
       PIPELINE_STATUS_PATH,
       JSON.stringify(
@@ -220,7 +238,9 @@ function updatePipelineStatus(state, step, message, stats = null) {
           step,
           message,
           stats,
-          updatedAt: new Date().toISOString(),
+          startedAt,
+          stepStartedAt,
+          updatedAt: timestamp,
         },
         null,
         2,
